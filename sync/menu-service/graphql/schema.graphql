@@ -1,0 +1,18 @@
+type MenuItem {
+  id: ID!
+  name: String!
+  description: String!
+  price: Float!
+  category: String!
+}
+
+type Query {
+  getMenuItems: [MenuItem] @field(resolver: "App\\GraphQL\\Queries\\MenuItemQuery@getMenuItems")
+  getMenuItem(id: ID!): MenuItem  @field(resolver: "App\\GraphQL\\Queries\\MenuItemQuery@getMenuItem")
+}
+
+type Mutation {
+  createMenuItem(name: String!, description: String!, price: Float!, category: String!): MenuItem  @field(resolver: "App\\GraphQL\\Mutations\\MenuItemMutation@createMenuItem")
+  updateMenuItem(id: ID!, name: String!, description: String!, price: Float!, category: String!): MenuItem  @field(resolver: "App\\GraphQL\\Mutations\\MenuItemMutation@updateMenuItem")
+  deleteMenuItem(id: ID!): MenuItem @field(resolver: "App\\GraphQL\\Mutations\\MenuItemMutation@deleteMenuItem")
+}

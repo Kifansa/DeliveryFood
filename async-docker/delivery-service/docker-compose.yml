@@ -1,0 +1,58 @@
+services:
+  delivery_app:
+    build: .
+    container_name: delivery-service-app
+    volumes:
+      - ../delivery-service:/var/www
+    networks:
+      - laravel-net
+    depends_on:
+      - delivery_db
+      - rabbitmq-delivery
+
+  delivery_web:
+    image: nginx:stable-alpine
+    container_name: delivery-service-nginx
+    ports:
+      - "8004:80"
+    volumes:
+      - ../delivery-service:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - laravel-net
+    depends_on:
+      - delivery_app
+
+  delivery_db:
+    image: mysql:8
+    container_name: delivery-service-db
+    environment:
+      MYSQL_DATABASE: delivery_service
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - delivery_db_data:/var/lib/mysql
+    ports:
+      - "3311:3306"
+    networks:
+      - laravel-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq-delivery:
+    image: rabbitmq:management
+    container_name: rabbitmq-delivery
+    ports:
+      - "5675:5672"
+      - "15675:15672"
+    networks:
+      - laravel-net
+
+networks:
+  laravel-net:
+    external: true
+
+volumes:
+  delivery_db_data:

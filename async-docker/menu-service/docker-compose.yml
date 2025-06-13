@@ -1,0 +1,59 @@
+services:
+  menu_app:
+    build: .
+    container_name: menu-service-app
+    volumes:
+      - ../menu-service:/var/www
+      - ../menu-service/bootstrap/cache:/var/www/bootstrap/cache
+    networks:
+      - laravel-net
+    depends_on:
+      - menu_db
+      - rabbitmq-menu
+
+  menu_web:
+    image: nginx:stable-alpine
+    container_name: menu-service-nginx
+    ports:
+      - "8001:80"
+    volumes:
+      - ../menu-service:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - laravel-net
+    depends_on:
+      - menu_app
+
+  menu_db:
+    image: mysql:8
+    container_name: menu-service-db
+    environment:
+      MYSQL_DATABASE: menu_service
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - menu_db_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    networks:
+      - laravel-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq-menu:
+    image: rabbitmq:management
+    container_name: rabbitmq-menu
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - laravel-net
+
+networks:
+  laravel-net:
+    external: true
+
+volumes:
+  menu_db_data:
