@@ -10,7 +10,9 @@
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
-        "php-amqplib/php-amqplib": "^3.7"
+        "php-amqplib/php-amqplib": "^3.7",
+        "php-amqplib/rabbitmq-bundle": "^2.17",
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

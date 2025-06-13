@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Queue;
 
 class DeliveryController extends Controller
 {
@@ -29,13 +30,15 @@ class DeliveryController extends Controller
             return new DeliveryResource(null, 'Failed', $validator->errors());
         }
 
-        $orderResponse = Http::get('http://127.0.0.1:8002/api/order/' . $request->order_id);
+        $orderResponse = Http::get('http://order-service-nginx:80/api/order/' . $request->order_id);
 
         if ($orderResponse->failed()) {
             return new DeliveryResource(null, 'Failed', 'Order not found');
         }
 
         $delivery = Delivery::create($request->all());
+
+        $this->publishDeliveryEvent($delivery);
 
         return new DeliveryResource($delivery, 'Success', 'Delivery created successfully');
     }
@@ -94,5 +97,14 @@ class DeliveryController extends Controller
         } else {
             return new DeliveryResource(null, 'Failed', 'Delivery not found');
         }
+    }
+    private function publishDeliveryEvent(Delivery $delivery)
+    {
+        $data = [
+            'event' => 'delivery-request',
+            'delivery' => $delivery,
+        ];
+
+        Queue::connection('rabbitmq')->push('delivery-requests', json_encode($data));
     }
 }
