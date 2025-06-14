@@ -8,15 +8,6 @@ use App\Jobs\PublishMenuUpdateEvent;
 
 class MenuItemMutation
 {
-    /**
-     * Method to create a new menu item
-     *
-     * @param  null  $_
-     * @param  array  $args
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \GraphQL\Type\Definition\ResolveInfo  $resolveInfo
-     * @return MenuItem
-     */
     public function createMenuItem($root, array $args)
     {
         $menuItem = MenuItem::create([
@@ -59,12 +50,7 @@ class MenuItemMutation
 
         return null;
     }
-    /**
-     * Publish the menu update event to RabbitMQ
-     *
-     * @param  MenuItem  $menuItem
-     * @return void
-     */
+    
     public function dispatchMenuUpdateEvent(MenuItem $menuItem)
     {
         PublishMenuUpdateEvent::dispatch($menuItem);

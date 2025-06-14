@@ -32,20 +32,22 @@ class OrderController extends Controller
 
         $query = "
         query {
-            getMenuItem(id: {$request->menu_item_id}) {
+            menu_items(where: {id: {_eq: {$request->menu_item_id}}}) {
                 price
             }
         }";
 
-        $menuResponse = Http::post('http://menu-service-nginx:80/menu-graphql', [
-            'query' => $query
+        $menuResponse = Http::withHeaders([
+            'x-hasura-admin-secret' => env('HASURA_ADMIN_SECRET'),
+        ])->post('http://hasura:8080/v1/graphql', [
+            'query' => $query,
         ]);
 
-        if ($menuResponse->failed() || !$menuResponse->ok() || !isset($menuResponse['data']['getMenuItem']['price'])) {
+        if ($menuResponse->failed() || !$menuResponse->ok() || !isset($menuResponse['data']['menu_items'][0]['price'])) {
             return new OrderResource(null, 'Failed', 'Failed to retrieve menu item price');
         }
 
-        $price = $menuResponse['data']['getMenuItem']['price'];
+        $price = $menuResponse['data']['menu_items'][0]['price'];
 
         if (!is_numeric($price) || $price <= 0) {
             return new OrderResource(null, 'Failed', 'Invalid menu item price');
@@ -97,20 +99,22 @@ class OrderController extends Controller
 
         $query = "
         query {
-            getMenuItem(id: {$request->menu_item_id}) {
+            menu_items(where: {id: {_eq: {$request->menu_item_id}}}) {
                 price
             }
         }";
 
-        $menuResponse = Http::post('http://menu-service-nginx:80/menu-graphql', [
-            'query' => $query
+        $menuResponse = Http::withHeaders([
+            'x-hasura-admin-secret' => env('HASURA_ADMIN_SECRET'),
+        ])->post('http://hasura:8080/v1/graphql', [
+            'query' => $query,
         ]);
 
-        if ($menuResponse->failed() || !$menuResponse->ok() || !isset($menuResponse['data']['getMenuItem']['price'])) {
+        if ($menuResponse->failed() || !$menuResponse->ok() || !isset($menuResponse['data']['menu_items'][0]['price'])) {
             return new OrderResource(null, 'Failed', 'Failed to retrieve menu item price');
         }
 
-        $price = $menuResponse['data']['getMenuItem']['price'];
+        $price = $menuResponse['data']['menu_items'][0]['price'];
 
         if (!is_numeric($price) || $price <= 0) {
             return new OrderResource(null, 'Failed', 'Invalid menu item price');
